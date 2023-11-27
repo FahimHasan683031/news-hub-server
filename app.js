@@ -34,7 +34,7 @@ const verify = (req, res, next) => {
 }
 
 // mongodb connection
-const uri =process.env.DB_URI;
+const uri = process.env.DB_URI;
 
 const client = new MongoClient(uri, {
     serverApi: {
@@ -74,21 +74,73 @@ async function run() {
 
         // users apis
         const userCollection = client.db(process.env.DB_NAME).collection("users")
-        app.post('/users',async(req,res)=>{
-            const user= req.body;
-            const query = {email:user.email}
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const query = { email: user.email }
             const existingUser = await userCollection.findOne(query)
-            if(existingUser){
-                return res.send({message:'user already exist', insertedId:null})
+            if (existingUser) {
+                return res.send({ message: 'user already exist', insertedId: null })
             }
             const result = await userCollection.insertOne(user)
             res.send(result)
         })
-        app.get('/users',async(req,res)=>{
+        app.get('/users', async (req, res) => {
             const result = await userCollection.find().toArray()
             res.send(result)
         })
-       
+
+        // publisher apis
+        const publisherCollection = client.db(process.env.DB_NAME).collection("publishers")
+        app.get('/publishers', async (req, res) => {
+            const result = await publisherCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.post('/publishers', async (req, res) => {
+            const data = req.body;
+            const result = await publisherCollection.insertOne(data)
+            res.send(result)
+        })
+
+        // articles apis
+        const articlesCollection = client.db(process.env.DB_NAME).collection("articles")
+        app.get('/articles', async (req, res) => {
+            const result = await articlesCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.post('/articles', async (req, res) => {
+            const data = req.body;
+            const result = await articlesCollection.insertOne(data)
+            res.send(result)
+        })
+
+        // articles tags apis
+        const articlesTagCollection = client.db(process.env.DB_NAME).collection("articlesTags")
+        app.get('/articlesTags', async (req, res) => {
+            const result = await articlesTagCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.post('/articlesTags', async (req, res) => {
+            const data = req.body;
+            const result = await articlesTagCollection.insertOne(data)
+            res.send(result)
+        })
+        app.put('/articlesTags/:id', async (req, res) => {
+            const id = req.params.id;
+            const data = req.body;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updateService = {
+                $set: {
+                    tags: data.tags,
+                },
+            }
+            const result = await articlesTagCollection.updateOne(filter, updateService, options)
+            res.send(result)
+        })
+
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
