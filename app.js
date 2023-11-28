@@ -93,6 +93,16 @@ async function run() {
             const result = await userCollection.findOne(query)
             res.send(result)
         })
+        app.patch(`/users/:id`,async(req,res)=>{
+            const query={_id:new ObjectId(req.params.id)}
+            const updateUser = {
+                $set: {
+                    rol:req.body.rol,
+                },
+            }
+            const result = await userCollection.updateOne(query, updateUser)
+            res.send(result)
+        })
 
         // publisher apis
         const publisherCollection = client.db(process.env.DB_NAME).collection("publishers")
@@ -219,7 +229,7 @@ async function run() {
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
-        // await client.close();
+       
     }
 }
 run().catch(console.dir);
