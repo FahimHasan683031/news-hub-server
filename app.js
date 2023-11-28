@@ -115,7 +115,18 @@ async function run() {
         // articles apis
         const articlesCollection = client.db(process.env.DB_NAME).collection("articles")
         app.get('/articles', async (req, res) => {
-            const result = await articlesCollection.find().toArray()
+
+            let query = {status:'pending'}
+            if (req.query.title) {
+                query.title = { $regex: new RegExp(req.query.title, 'i') }
+            }
+            if (req.query.tags) {
+                query.tags = { $regex: new RegExp(req.query.tags, 'i') }
+            }
+            if (req.query.publisher) {
+                query.publisher =  req.query.publisher
+            }
+            const result = await articlesCollection.find(query).toArray()
             res.send(result)
         })
         app.get(`/articles/:id`, async (req, res) => {
