@@ -116,7 +116,7 @@ async function run() {
         const articlesCollection = client.db(process.env.DB_NAME).collection("articles")
         app.get('/articles', async (req, res) => {
 
-            let query = {status:'pending'}
+            let query = {}
             if (req.query.title) {
                 query.title = { $regex: new RegExp(req.query.title, 'i') }
             }
@@ -125,6 +125,15 @@ async function run() {
             }
             if (req.query.publisher) {
                 query.publisher =  req.query.publisher
+            }
+            if (req.query.type) {
+                query.type =  req.query.type
+            }
+            if (req.query.email) {
+                query.email =  req.query.email
+            }
+            if (req.query.status) {
+                query.status =  req.query.status
             }
             const result = await articlesCollection.find(query).toArray()
             res.send(result)
@@ -135,13 +144,48 @@ async function run() {
             const result = await articlesCollection.findOne(query)
             res.send(result)
         })
-
+        app.get(`/articlesView/:id`, async (req, res) => {
+            const id =req.params.id
+            const query = {_id: new ObjectId(id) }
+            const result = await articlesCollection.updateOne(query,{ $inc: { view: 1 } })
+            res.send(result)
+        })
+        
         app.post('/articles', async (req, res) => {
             const data = req.body;
             const result = await articlesCollection.insertOne(data)
             res.send(result)
         })
-
+        app.put('/articles/:id', async (req, res) => {
+            const id = req.params.id;
+            const data = req.body;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updateService = {
+                $set: {
+                    image:data.image,
+                    title:data.title,
+                    publisher:data.publisher,
+                    description:data.description,
+                    tags:data.tags,
+                    email:data.email,
+                    date:data.date,
+                    status:data.status,
+                    view:data.view,
+                    type:data.type
+                },
+            }
+            const result = await articlesCollection.updateOne(filter, updateService, options)
+            res.send(result)
+        })
+        app.delete("/articles/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = {
+                _id: new ObjectId(id),
+            };
+            const result = await articlesCollection.deleteOne(query);
+            res.send(result);
+        });
         // articles tags apis
         const articlesTagCollection = client.db(process.env.DB_NAME).collection("articlesTags")
         app.get('/articlesTags', async (req, res) => {
@@ -154,6 +198,7 @@ async function run() {
             const result = await articlesTagCollection.insertOne(data)
             res.send(result)
         })
+
         app.put('/articlesTags/:id', async (req, res) => {
             const id = req.params.id;
             const data = req.body;
