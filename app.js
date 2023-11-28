@@ -88,11 +88,21 @@ async function run() {
             const result = await userCollection.find().toArray()
             res.send(result)
         })
+        app.get(`/users/:email`, async (req, res) => {
+            const query = {email:req.params.email }
+            const result = await userCollection.findOne(query)
+            res.send(result)
+        })
 
         // publisher apis
         const publisherCollection = client.db(process.env.DB_NAME).collection("publishers")
         app.get('/publishers', async (req, res) => {
             const result = await publisherCollection.find().toArray()
+            res.send(result)
+        })
+        app.get(`/publishers/:name`, async (req, res) => {
+            const query = {name:req.params.name }
+            const result = await publisherCollection.findOne(query)
             res.send(result)
         })
 
@@ -106,6 +116,12 @@ async function run() {
         const articlesCollection = client.db(process.env.DB_NAME).collection("articles")
         app.get('/articles', async (req, res) => {
             const result = await articlesCollection.find().toArray()
+            res.send(result)
+        })
+        app.get(`/articles/:id`, async (req, res) => {
+            const id =req.params.id
+            const query = {_id: new ObjectId(id) }
+            const result = await articlesCollection.findOne(query)
             res.send(result)
         })
 
