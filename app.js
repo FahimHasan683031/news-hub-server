@@ -103,6 +103,14 @@ async function run() {
             const result = await userCollection.updateOne(query, updateUser)
             res.send(result)
         })
+        app.patch(`/premiumUser/:email`,async(req,res)=>{
+            const query={email:req.params.email}
+            const updateUser = {
+                $set:req.body
+            }
+            const result = await userCollection.updateOne(query, updateUser)
+            res.send(result)
+        })
 
         // publisher apis
         const publisherCollection = client.db(process.env.DB_NAME).collection("publishers")
@@ -186,6 +194,15 @@ async function run() {
                 },
             }
             const result = await articlesCollection.updateOne(filter, updateService, options)
+            res.send(result)
+        })
+        app.patch(`/articles/:id`,async(req,res)=>{
+            const data = req.body
+            const query={_id:new ObjectId(req.params.id)}
+            const updateArticle = {
+                $set: data
+            }
+            const result = await articlesCollection.updateOne(query, updateArticle)
             res.send(result)
         })
         app.delete("/articles/:id", async (req, res) => {
