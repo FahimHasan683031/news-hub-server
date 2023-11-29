@@ -135,6 +135,8 @@ async function run() {
         app.get('/articles', async (req, res) => {
 
             let query = {}
+            const limit = req.query.limit ? parseInt(req.query.limit) : 0;
+            const sort = {view:req.query.sort ? parseInt(req.query.sort) : 1};
             if (req.query.title) {
                 query.title = { $regex: new RegExp(req.query.title, 'i') }
             }
@@ -153,7 +155,7 @@ async function run() {
             if (req.query.status) {
                 query.status =  req.query.status
             }
-            const result = await articlesCollection.find(query).toArray()
+            const result = await articlesCollection.find(query).sort(sort).limit(limit).toArray()
             res.send(result)
         })
         app.get(`/articles/:id`, async (req, res) => {
