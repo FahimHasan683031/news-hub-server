@@ -12,7 +12,12 @@ const port = process.env.PORT || 5000;
 app.use(express.json())
 app.use(cors({
     origin: [
-        "http://localhost:5173"],
+        "http://localhost:5173",
+        "https://news-portal-b2631.web.app/",
+        "https://news-portal-b2631.web.app",
+        "http://news-hub-6830.surge.sh",
+        "https://news-portal-b2631.firebaseapp.com/"
+    ],
     credentials: true
 }))
 app.use(cookieParser())
@@ -85,7 +90,11 @@ async function run() {
             res.send(result)
         })
         app.get('/users', async (req, res) => {
-            const result = await userCollection.find().toArray()
+            const query ={}
+            if(req.query.rol){
+                query.rol=req.query.rol
+            }
+            const result = await userCollection.find(query).toArray()
             res.send(result)
         })
         app.get(`/users/:email`, async (req, res) => {
@@ -244,7 +253,6 @@ async function run() {
 
 
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
